@@ -1,50 +1,84 @@
 <!doctype html>
 <html lang="uz">
-<head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PROSTAFF — ishchi</title>
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-<body>
-  <header class="topbar">
-    <strong>PROSTAFF — ishchi</strong>
-    <button id="logout" class="link">Chiqish</button>
-  </header>
+  <title>Phone Auth Test</title>
+  <div style="max-width:480px;margin:24px auto;font-family:system-ui,sans-serif">
+    <h2>Phone Auth Test</h2>
 
-  <main class="container">
-    <h1>Xush kelibsiz!</h1>
-    <p>Ishlarni olish uchun tizimga kiring.</p>
+    <label>Telefon (+998...):</label>
+    <input id="phone" style="width:100%;padding:8px;margin:6px 0" value="+998" />
 
-    <!-- reCAPTCHA konteyneri (ko‘rinmas, majburiy) -->
-    <div id="recaptcha-container"></div>
+    <div id="recaptcha-container" style="margin:10px 0;"></div>
 
-    <!-- Telefon bilan kirish -->
-    <div class="card">
-      <label for="phone">Telefon raqam (masalan, +998501234567)</label>
-      <input id="phone" type="tel" placeholder="+998..." />
-      <button id="send-code">Kod­ni yuborish</button>
+    <button id="send" style="padding:10px 14px">Kodni yuborish</button>
 
-      <div id="code-row" style="display:none;margin-top:12px">
-        <label for="code">SMS kod</label>
-        <input id="code" inputmode="numeric" maxlength="6" placeholder="123456" />
-        <button id="verify-code">Tasdiqlash</button>
-      </div>
-
-      <p id="msg" class="muted" style="margin-top:10px"></p>
+    <div id="code-row" style="display:none;margin-top:12px">
+      <label>Kod:</label>
+      <input id="code" style="width:100%;padding:8px;margin:6px 0" />
+      <button id="verify" style="padding:10px 14px">Tasdiqlash</button>
     </div>
 
-    <!-- Kirilgandan keyin ko‘rinadigan hudud (hozircha demo matn) -->
-    <section id="dashboard" style="display:none;margin-top:24px">
-      <h2>Asosiy oyna</h2>
-      <p>Ishchi holati: <span id="worker-state">oflayn</span></p>
-    </section>
-  </main>
+    <pre id="log" style="background:#111;color:#0f0;padding:12px;white-space:pre-wrap;margin-top:16px;min-height:70px"></pre>
+  </div>
 
-  <!-- ENV konfiguratsiya (sizda allaqachon bor) -->
-  <script src="./env.js"></script>
+  <script>
+    // <-- BU YERGA O'ZINGIZNING PROD configingizni qo'ying (WORKER ilovasi uchun)!
+    window.__ENV = {
+      apiKey: "AIzaSyBUOLvqsw7SS0qL8fjLRRelpey65otHhsg",
+      authDomain: "prostaff-prod.firebaseapp.com",
+      projectId: "prostaff-prod",
+      storageBucket: "prostaff-prod.firebasestorage.app",
+      messagingSenderId: "468406236145",
+      appId: "1:468406236145:web:ecfebea79ac0077b704a50",
+      measurementId: "G-MQPQLKGJB3"
+    };
+  </script>
 
-  <!-- App kodi -->
-  <script type="module" src="./app.js"></script>
-</body>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const log = (t)=>{ document.getElementById('log').textContent = t; console.log(t); };
+
+    const app = initializeApp(window.__ENV);
+    const auth = getAuth(app);
+
+    let verifier, confirmation;
+
+    function setupRecaptcha() {
+      try {
+        verifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "normal" });
+        log("reCAPTCHA tayyor.");
+      } catch (e) {
+        log("reCAPTCHA xato: " + (e.code || e.message));
+      }
+    }
+    setupRecaptcha();
+
+    document.getElementById("send").onclick = async () => {
+      try {
+        const phone = document.getElementById("phone").value.trim();
+        log("SMS yuborilmoqda: " + phone);
+        confirmation = await signInWithPhoneNumber(auth, phone, verifier);
+        document.getElementById("code-row").style.display = "block";
+        log("SMS yuborildi. Kodingizni kiriting.");
+      } catch (e) {
+        log("SEND ERROR: " + (e.code || e.message));
+        alert("SEND ERROR: " + (e.code || e.message));
+      }
+    };
+
+    document.getElementById("verify").onclick = async () => {
+      try {
+        const code = document.getElementById("code").value.trim();
+        const res = await confirmation.confirm(code);
+        log("OK: " + (res.user?.phoneNumber || res.user?.uid));
+        alert("Kirish OK: " + (res.user?.phoneNumber || res.user?.uid));
+      } catch (e) {
+        log("VERIFY ERROR: " + (e.code || e.message));
+        alert("VERIFY ERROR: " + (e.code || e.message));
+      }
+    };
+  </script>
 </html>
