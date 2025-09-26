@@ -5,84 +5,46 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PROSTAFF — ishchi</title>
   <link rel="stylesheet" href="./styles.css" />
-  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Prostaff Worker&quot;,&quot;display&quot;:&quot;standalone&quot;}" />
 </head>
 <body>
-  <header class="bar">
-    <div class="brand"><span class="badge">P</span> PROSTAFF — ishchi</div>
-    <button id="btnSignOut" class="ghost">Chiqish</button>
+  <header class="topbar">
+    <strong>PROSTAFF — ishchi</strong>
+    <button id="logout" class="link">Chiqish</button>
   </header>
 
-  <main id="screenAuth" class="screen">
+  <main class="container">
     <h1>Xush kelibsiz!</h1>
     <p>Ishlarni olish uchun tizimga kiring.</p>
-    <div id="authBox">
-      <input id="phone" placeholder="+998_________" inputmode="tel" />
-      <div id="recaptcha"></div>
-      <button id="btnSendCode">Kodni yuborish</button>
-      <div id="codeBox" class="hide">
-        <input id="code" placeholder="SMS kod" inputmode="numeric" />
-        <button id="btnVerify">Tasdiqlash</button>
+
+    <!-- reCAPTCHA konteyneri (ko‘rinmas, majburiy) -->
+    <div id="recaptcha-container"></div>
+
+    <!-- Telefon bilan kirish -->
+    <div class="card">
+      <label for="phone">Telefon raqam (masalan, +998501234567)</label>
+      <input id="phone" type="tel" placeholder="+998..." />
+      <button id="send-code">Kod­ni yuborish</button>
+
+      <div id="code-row" style="display:none;margin-top:12px">
+        <label for="code">SMS kod</label>
+        <input id="code" inputmode="numeric" maxlength="6" placeholder="123456" />
+        <button id="verify-code">Tasdiqlash</button>
       </div>
-      <p class="hint">Telefon bilan kirish yoqilgan.</p>
+
+      <p id="msg" class="muted" style="margin-top:10px"></p>
     </div>
-  </main>
 
-  <main id="screenHome" class="screen hide">
-    <section class="card hero">
-      <h2>Ishlar ro‘yxati</h2>
-      <p id="emptyState">Hozircha buyurtmalar yo‘q.</p>
-      <div id="jobList" class="list"></div>
-
-      <div class="row center">
-        <button id="btnToggleOnline" class="primary">Boshlash</button>
-      </div>
-      <p class="muted center" id="onlineState">Status: <b>offline</b></p>
-    </section>
-
-    <nav class="tabs">
-      <button data-tab="home" class="active">Bosh sahifa</button>
-      <button data-tab="orders">Buyurtmalar</button>
-      <button data-tab="categories">Kategoriyalar</button>
-      <button data-tab="profile">Profil</button>
-    </nav>
-
-    <section id="tabHome" class="tab active"></section>
-    <section id="tabOrders" class="tab">
-      <div id="assignedList" class="list"></div>
-    </section>
-
-    <section id="tabCategories" class="tab">
-      <h3>Qaysi ishlarni qabul qilasiz?</h3>
-      <div id="catGrid" class="grid"></div>
-      <button id="btnSaveCats" class="primary">Saqlash</button>
-    </section>
-
-    <section id="tabProfile" class="tab">
-      <div class="form">
-        <label>Ism</label><input id="pName" />
-        <label>Familiya</label><input id="pSurname" />
-        <label>Jinsi</label>
-        <select id="pGender">
-          <option value="">Tanlang</option>
-          <option value="erkak">Erkak</option>
-          <option value="ayol">Ayol</option>
-        </select>
-        <label>Joylashuv (avto)</label>
-        <button id="btnSetLocation">Lokatsiyani yangilash</button>
-        <p class="muted">Online bo‘lsangiz 10 km radiusdagi e’lonlar keladi.</p>
-      </div>
+    <!-- Kirilgandan keyin ko‘rinadigan hudud (hozircha demo matn) -->
+    <section id="dashboard" style="display:none;margin-top:24px">
+      <h2>Asosiy oyna</h2>
+      <p>Ishchi holati: <span id="worker-state">oflayn</span></p>
     </section>
   </main>
 
-  <!-- Firebase v10 modular SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging-compat.js"></script>
-
+  <!-- ENV konfiguratsiya (sizda allaqachon bor) -->
   <script src="./env.js"></script>
-  <script src="./categories.js"></script>
-  <script src="./app.js"></script>
+
+  <!-- App kodi -->
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
